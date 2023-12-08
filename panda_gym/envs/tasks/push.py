@@ -89,8 +89,8 @@ class Push(Task):
         d = distance(achieved_goal, desired_goal)
         return np.array(d < self.distance_threshold, dtype=bool)
 
-    def compute_reward(self, achieved_goal, desired_goal, info: Dict[str, Any]) -> np.ndarray:
-        d = distance(achieved_goal, desired_goal)
+    def compute_reward(self, achieved_goal, desired_goal, init_obs, observations, info: Dict[str, Any]) -> np.ndarray:
+        d = distance(observations[0:3], init_obs[6:9]) * max(abs(distance(observations[0:3], observations[6:9]) - 0.1), 0) + distance(observations[0:3], desired_goal) ** 2
         if self.reward_type == "sparse":
             return -np.array(d > self.distance_threshold, dtype=np.float32)
         else:

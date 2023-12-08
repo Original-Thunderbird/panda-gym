@@ -190,7 +190,7 @@ class Task(ABC):
         """Returns whether the achieved goal match the desired goal."""
 
     @abstractmethod
-    def compute_reward(self, achieved_goal: np.ndarray, desired_goal: np.ndarray, info: Dict[str, Any] = {}) -> np.ndarray:
+    def compute_reward(self, achieved_goal: np.ndarray, desired_goal: np.ndarray, init_obs: np.ndarray, observations: np.ndarray, info: Dict[str, Any] = {}) -> np.ndarray:
         """Compute reward associated to the achieved and the desired goal."""
 
 
@@ -254,6 +254,10 @@ class RobotTaskEnv(gym.Env):
         self.render_yaw = render_yaw
         self.render_pitch = render_pitch
         self.render_roll = render_roll
+        
+        # get init obs here!
+        self.init_obs = self.task.get_obs().astype(np.float32)
+
         with self.sim.no_rendering():
             self.sim.place_visualizer(
                 target_position=self.render_target_position,
@@ -321,7 +325,7 @@ class RobotTaskEnv(gym.Env):
         terminated = bool(self.task.is_success(observation["achieved_goal"], self.task.get_goal()))
         truncated = False
         info = {"is_success": terminated}
-        reward = float(self.task.compute_reward(observation["achieved_goal"], self.task.get_goal(), info))
+        reward = float(self.task.compute_reward(observation["achieved_goal"], self.task.get_goal(), self.init_obs, self.task.get_obs(), info))
         return observation, reward, terminated, truncated, info
 
     def close(self) -> None:
