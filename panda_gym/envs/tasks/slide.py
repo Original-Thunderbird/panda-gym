@@ -94,7 +94,9 @@ class Slide(Task):
         return np.array(d < self.distance_threshold, dtype=bool)
 
     def compute_reward(self, achieved_goal, desired_goal, init_obs, observations, info: Dict[str, Any]) -> np.ndarray:
-        d = distance(observations[0:3], init_obs[6:9]) * max(abs(distance(observations[0:3], observations[6:9]) - 0.2), 0) + distance(observations[0:3], desired_goal) ** 2
+        obj_arr = np.linalg.norm(np.array([observations[0]-observations[6], observations[1]]-observations[7]))
+        dst_arr = np.linalg.norm(np.array([desired_goal[0]-observations[6], desired_goal[1]-observations[7]]))
+        d = -obj_arr * dst_arr * distance(observations[0:3], init_obs[6:9]) * max(abs(distance(observations[0:3], observations[6:9]) - 0.2), 0) + distance(observations[0:3], desired_goal) ** 2
         if self.reward_type == "sparse":
             return -np.array(d > self.distance_threshold, dtype=np.float32)
         else:
